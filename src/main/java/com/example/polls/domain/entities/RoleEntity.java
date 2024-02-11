@@ -17,7 +17,7 @@ import org.hibernate.annotations.NaturalId;
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @NaturalId

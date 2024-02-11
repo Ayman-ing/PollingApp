@@ -1,5 +1,6 @@
 package com.example.polls.domain.entities;
 
+import com.example.polls.domain.entities.audit.DateAudit;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +26,7 @@ import java.util.Set;
 public class UserEntity extends DateAudit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @NotBlank
     @Size(max=40)
     private String name;

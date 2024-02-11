@@ -1,4 +1,4 @@
-package com.example.polls.domain.entities;
+package com.example.polls.domain.entities.audit;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
