@@ -1,0 +1,12 @@
+version: '4.26.1'
+
+services:
+
+  db:
+    image: postgres:latest
+    container_name: PollingApp
+    ports:
+      - "5332:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
