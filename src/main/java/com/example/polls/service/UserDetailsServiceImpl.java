@@ -10,22 +10,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
-
+    @Transactional
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         logger.debug("Entering in loadUserByUsername Method...");
-        UserEntity user = userRepository.findByUsername(username).orElseThrow(
+        UserEntity user = userRepository.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail).orElseThrow(
 
-               () -> new UsernameNotFoundException("User not found with username: " + username)
+               () -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail)
         );
         logger.info("User Authenticated Successfully..!!!");
-        return new CustomUserDetails(user);
+        return CustomUserDetails.create(user);
 
     }
 }

@@ -23,6 +23,10 @@ public class RoleEntity {
     @NaturalId
     @Column(length = 60)
     private RoleName name;
+    public RoleEntity(RoleName roleName)  {
+        this.name=roleName;
+
+    }
 
 }
 

@@ -9,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,11 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-        securedEnabled = true,
-        jsr250Enabled = true,
-        prePostEnabled = true
-)
+
 @Configuration
 public class SecurityConfig {
     @Autowired
@@ -40,17 +35,16 @@ public class SecurityConfig {
 
                         .requestMatchers("/",
                                         "/favicon.ico",
-                                        "/**/*.png",
-                                        "/**/*.gif",
-                                        "/**/*.svg",
-                                        "/**/*.jpg",
-                                        "/**/*.html",
-                                        "/**/*.css",
-                                        "/**/*.js")
+                                        "/*/*.png",
+                                        "/*/*.gif",
+                                        "/*/*.svg",
+                                        "/*/*.jpg",
+                                        "/*/*.html",
+                                        "/*/*.css",
+                                        "/*/*.js")
                                 .permitAll()
-                                .requestMatchers("/api/auth/**")
-                                .permitAll().requestMatchers("/api/user/checkUsernameAvailability"
-                                        , "/api/user/checkEmailAvailability")
+                                .requestMatchers("/api/auth/login",
+                                "/api/auth/register")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

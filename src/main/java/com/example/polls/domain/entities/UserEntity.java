@@ -54,7 +54,12 @@ public class UserEntity extends DateAudit {
         this.email = email;
         this.password = password;
     }
-
+    //for the admin
+    public UserEntity(String name, String password,Set<RoleEntity> roles) {
+        this.name = name;
+        this.password = password;
+        this.roles= roles;
+    }
 
 
 }

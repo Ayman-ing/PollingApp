@@ -2,7 +2,10 @@ package com.example.polls.domain;
 
 import com.example.polls.domain.entities.RoleEntity;
 import com.example.polls.domain.entities.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,29 +13,55 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-@Data
-public class CustomUserDetails extends UserEntity implements UserDetails {
-    private String name;
-    private String username;
-    private String password;
-    private String email;
-    Collection<? extends GrantedAuthority> authorities;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-    public CustomUserDetails(UserEntity byUsername) {
-        this.username=byUsername.getUsername();
-        this.name= byUsername.getName();
-        this.password = byUsername.getPassword();
-        this.email = byUsername.getEmail();
-        List<GrantedAuthority> auths = new ArrayList<>();
-        for(RoleEntity role: byUsername.getRoles()){
-            auths.add(new SimpleGrantedAuthority(role.getName().toString().toUpperCase()));
-        }
-        this.authorities = auths;
+@Data
+@Getter
+@Setter
+public class CustomUserDetails implements UserDetails {
+    private Long id;
+
+    private String name;
+
+    private String username;
+
+    @JsonIgnore
+    private String email;
+
+    @JsonIgnore
+    private String password;
+
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public CustomUserDetails(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.authorities = authorities;
     }
 
+    public static CustomUserDetails create(UserEntity user) {
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+                new SimpleGrantedAuthority(role.getName().name())
+        ).collect(Collectors.toList());
+
+        return new CustomUserDetails(
+                user.getId(),
+                user.getName(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPassword(),
+                authorities
+        );
+    }
+
+
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -41,8 +70,8 @@ public class CustomUserDetails extends UserEntity implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
@@ -64,4 +93,19 @@ public class CustomUserDetails extends UserEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomUserDetails that = (CustomUserDetails) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
+
 }
