@@ -49,7 +49,7 @@ public class PollsApplication {
 			roleRepository.save(new RoleEntity(ROLE_USER));
 			Set<RoleEntity> roles = new HashSet<>();
 			roles.add(adminRole);
-			UserEntity admin = new UserEntity("admin",
+			UserEntity admin = new UserEntity("admin","admin","adminmail@gmail.com",
 					encoder.encode("password"),
 					roles);
 			userRepository.save(admin);

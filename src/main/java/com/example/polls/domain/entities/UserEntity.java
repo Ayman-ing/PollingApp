@@ -5,17 +5,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -47,7 +45,7 @@ public class UserEntity extends DateAudit {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles = new HashSet<>();
-    //constructer without the id filed as it's auto generated
+    //for normal users
     public UserEntity(String name, String username, String email, String password) {
         this.name = name;
         this.username = username;
@@ -55,11 +53,14 @@ public class UserEntity extends DateAudit {
         this.password = password;
     }
     //for the admin
-    public UserEntity(String name, String password,Set<RoleEntity> roles) {
+    public UserEntity(String name, String username, String email, String password,Set<RoleEntity> roles) {
         this.name = name;
+        this.username = username;
+        this.email = email;
         this.password = password;
         this.roles= roles;
     }
+
 
 
 }

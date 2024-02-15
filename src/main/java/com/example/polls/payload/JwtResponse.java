@@ -1,4 +1,4 @@
-package com.example.polls.domain.dto;
+package com.example.polls.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class JwtResponseDTO {
+public class JwtResponse {
     private String accessToken;
-    private String tokenType = "Bearer";
+     final private String tokenType = "Bearer";
 
 }

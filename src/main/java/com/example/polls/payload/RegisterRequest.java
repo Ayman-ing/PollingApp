@@ -1,10 +1,7 @@
-package com.example.polls.domain.dto;
+package com.example.polls.payload;
 
 
-import com.example.polls.domain.entities.RoleEntity;
 import lombok.*;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -12,7 +9,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 
-public class RegisterRequestDTO {
+public class RegisterRequest {
     private String name;
     private String username;
     private String email;

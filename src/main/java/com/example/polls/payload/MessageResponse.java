@@ -1,4 +1,4 @@
-package com.example.polls.domain.dto;
+package com.example.polls.payload;
 
 
 import lombok.Data;
