@@ -1,9 +1,11 @@
 package com.example.polls.service;
 
 import com.example.polls.domain.entities.RoleEntity;
+import com.example.polls.domain.entities.RoleName;
 import com.example.polls.domain.entities.UserEntity;
 import com.example.polls.payload.JwtResponse;
 import com.example.polls.payload.MessageResponse;
+import com.example.polls.repository.RoleRepository;
 import com.example.polls.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,23 +19,31 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.example.polls.domain.entities.RoleName.ROLE_ADMIN;
+import static com.example.polls.domain.entities.RoleName.ROLE_USER;
 
 @Service
 public class AuthenticationService {
     AuthenticationManager authenticationManager;
     JwtService jwtService;
     UserRepository userRepository;
+    RoleRepository roleRepository;
     PasswordEncoder encoder;
     public AuthenticationService(AuthenticationManager authenticationManager,
                                  JwtService jwtService,
                                  UserRepository userRepository,
-                                 PasswordEncoder encoder) {
+                                 PasswordEncoder encoder,
+                                 RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.roleRepository = roleRepository;
     }
 
     public ResponseEntity<?> loginUser(String username, String password) {
@@ -80,8 +90,8 @@ public class AuthenticationService {
 
         Set<RoleEntity> roles = new HashSet<>();
 
-
-        user.setRoles(roles);
+        RoleEntity userRole = roleRepository.findByName(RoleName.ROLE_USER);
+        user.setRoles(Collections.singleton(userRole));
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
