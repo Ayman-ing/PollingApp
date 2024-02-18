@@ -39,8 +39,7 @@ public class UserEntity extends DateAudit {
     @NotBlank
     @Size(max = 100)
     private String password;
-    @ManyToMany(fetch = FetchType.LAZY) //the role entity will not be loaded from the db until there
-                                        //refrenced in the code
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
