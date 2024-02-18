@@ -34,7 +34,7 @@ public class PollsApplication {
 
 	@PostConstruct
 	void init(){
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT+1:00"));
 	}
 	public static void main(String[] args) {
 
