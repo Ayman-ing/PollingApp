@@ -10,12 +10,18 @@ import lombok.Setter;
 
 public class MessageResponse {
     private String message;
+    private boolean success;
 
 
     public MessageResponse(String message) {
         this.message = message;
 
     }
+    public MessageResponse(boolean success,String message) {
+        this.message = message;
+
+    }
+
 
 }
 
