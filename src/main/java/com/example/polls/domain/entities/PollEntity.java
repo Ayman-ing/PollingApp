@@ -30,7 +30,7 @@ public class PollEntity extends UserDateAudit {
     @Size(max=140)
     private String question;
     @OneToMany(
-            mappedBy="polls",
+            mappedBy="poll",
             cascade = CascadeType.ALL,//changes made to the poll entity should be cascaded to its associated choice entities
             fetch = FetchType.EAGER,//the choices will be loaded immediately with the poll when accessing the  poll
             orphanRemoval = true//when a choice is deleted from a poll entity the choice get removed also from the db

@@ -3,7 +3,11 @@ package com.example.polls.domain.entities;
 
 import com.example.polls.domain.entities.audit.DateAudit;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "votes", uniqueConstraints = {
         @UniqueConstraint(columnNames = {

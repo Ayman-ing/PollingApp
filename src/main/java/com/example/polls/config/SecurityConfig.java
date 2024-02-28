@@ -52,13 +52,14 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/login",
                                 "/api/auth/register")
                                 .permitAll()
-                                .requestMatchers("/admin").hasRole("ADMIN")
-                                .requestMatchers("/user").hasAnyRole("ADMIN","USER")
                                 .requestMatchers("/api/user/checkUsernameAvailability",
                                         "/api/user/checkEmailAvailability")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/polls/**", "/api/users/**")
                                 .permitAll()
+                                .requestMatchers("/admin").hasRole("ADMIN")
+                                .requestMatchers("/user").hasAnyRole("ADMIN","USER")
+
                                 .anyRequest()
                                 .authenticated()
                         )
