@@ -1,18 +1,23 @@
 package com.example.polls.config;
 
 import com.example.polls.jwt.JwtAuthFilter;
+import com.example.polls.jwt.JwtAuthenticationEntryPoint;
 import com.example.polls.service.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,22 +27,29 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @Configuration
+@EnableGlobalMethodSecurity(
+        securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true
+)
 public class SecurityConfig {
 
+    @Autowired
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
 
+    @Autowired
+    JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public JwtAuthFilter jwtAuthFilter() {
-        return new JwtAuthFilter();
-    }
     @Bean
     public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+
+        http.csrf(AbstractHttpConfigurer::disable)
+
+            .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/",
                                         "/favicon.ico",
@@ -55,7 +67,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/user/checkUsernameAvailability",
                                         "/api/user/checkEmailAvailability")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/polls/**", "/api/users/**")
+                                .requestMatchers(HttpMethod.GET,"/api/polls","/api/polls/**", "/api/users/**")
                                 .permitAll()
                                 .requestMatchers("/admin").hasRole("ADMIN")
                                 .requestMatchers("/user").hasAnyRole("ADMIN","USER")
@@ -64,7 +76,7 @@ public class SecurityConfig {
                                 .authenticated()
                         )
                  .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 

@@ -13,8 +13,12 @@ import com.example.polls.util.AppConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+;
+
 
 @RestController
 @RequestMapping("/api")
@@ -48,15 +52,30 @@ public class UserController {
         boolean isAvailable = !userRepository.existsByEmail(email);
         return new UserIdentityAvailability(isAvailable);
     }
+
     @GetMapping("/users/{username}")
-    public UserProfile getUserProfile(@PathVariable(value = "username") String username) {
+    public /*ResponseEntity<?>/*/ UserProfile getUserProfile(@PathVariable(value = "username") String username) {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
         long pollCount = pollRepository.countByCreatedBy(user.getId());
         long voteCount = voteRepository.countByUserId(user.getId());
 
-        return new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getCreatedAt(), pollCount, voteCount);
+        UserProfile userProfile = new UserProfile(user.getId(), user.getUsername(), user.getName(), user.getCreatedAt(), pollCount, voteCount);
+
+        return userProfile;
+        /* try {
+            UserEntity user = userRepository.findByUsername(username).orElseThrow();
+            long pollCount = pollRepository.countByCreatedBy(user.getId());
+            long voteCount = voteRepository.countByUserId(user.getId());
+            return ResponseEntity.ok().body(new UserProfile(user.getId(), user.getUsername(),
+                    user.getName(), user.getCreatedAt(),
+                    pollCount, voteCount));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new MessageResponse(String.format("error: %s not found ",username)));
+        }*/
     }
     @GetMapping("/users/{username}/polls")
     public PagedResponse<PollResponse> getPollsCreatedBy(@PathVariable(value = "username") String username,

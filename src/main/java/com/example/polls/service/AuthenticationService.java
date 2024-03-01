@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,8 +47,7 @@ public class AuthenticationService {
         this.roleRepository = roleRepository;
     }
 
-    public ResponseEntity<?> loginUser(String username, String password) {
-        try {
+    public ResponseEntity<?> loginUser(String username, String password) throws BadCredentialsException {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username,
@@ -55,19 +55,9 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
 
-            return ResponseEntity.ok(JwtResponse.builder()
-                    .accessToken(jwtService.GenerateToken(username)).build());
-        }
-        catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: invalid username or password"));
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new MessageResponse("error occuried")
-            );
+        return ResponseEntity.ok(JwtResponse.builder()
+                .accessToken(jwtService.GenerateToken(username)).build());
 
-        }
     }
 
     public ResponseEntity<?> registerUser(String username, String email, String name, String password) {
@@ -94,6 +84,6 @@ public class AuthenticationService {
         user.setRoles(Collections.singleton(userRole));
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse(true,"User registered successfully!"));
     }
 }

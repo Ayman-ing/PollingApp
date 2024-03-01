@@ -4,10 +4,14 @@ import com.example.polls.payload.LoginRequest;
 import com.example.polls.payload.MessageResponse;
 import com.example.polls.payload.RegisterRequest;
 import com.example.polls.service.AuthenticationService;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,32 +29,22 @@ public class AuthenticationController {
 
 
     @PostMapping(path="/api/auth/login")
-    public ResponseEntity<?> AuthenticationAndGetToken(@RequestBody LoginRequest loginRequest) {
-        try {
-            return authenticationService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+    public ResponseEntity<?> AuthenticationAndGetToken(@Valid @RequestBody LoginRequest loginRequest) throws HttpMessageNotReadableException,BadCredentialsException {
 
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new MessageResponse("error")
-            );
-        }
+        return authenticationService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+
+
+
     }
 
     @PostMapping(path="/api/auth/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) {
-        try {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) throws ConstraintViolationException, HttpMessageNotReadableException {
             return authenticationService.registerUser(signUpRequest.getUsername(),
                     signUpRequest.getEmail(),
                     signUpRequest.getName(),
                     signUpRequest.getPassword()
             );
-        }
-        catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new MessageResponse("error")
-            );
-        }
+
 
 
     }
