@@ -26,6 +26,7 @@
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/payload/ChoiceRequest.java
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/payload/ChoiceResponse.java
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/domain/entities/RoleName.java
+/mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/exception/ExceptionHandlerAdvice.java
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/payload/PollRequest.java
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/domain/entities/RoleEntity.java
 /mnt/c/study/PollingApp/polls/src/main/java/com/example/polls/exception/ResourceNotFoundException.java

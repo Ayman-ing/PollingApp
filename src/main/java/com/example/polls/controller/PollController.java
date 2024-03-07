@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -25,14 +27,7 @@ import java.net.URI;
 @RequestMapping("/api/polls")
 
 public class PollController {
-    @Autowired
-    private PollRepository pollRepository;
 
-    @Autowired
-    private VoteRepository voteRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private PollService pollService;
@@ -46,8 +41,8 @@ public class PollController {
     }
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> createPoll(@RequestBody PollRequest pollRequest) {
-        try {
+            public ResponseEntity<?> createPoll(@RequestBody PollRequest pollRequest) throws BadCredentialsException {
+
             PollEntity poll = pollService.createPoll(pollRequest);
 
 
@@ -57,12 +52,11 @@ public class PollController {
 
             return ResponseEntity.created(location)
                     .body(new MessageResponse(true, "Poll Created Successfully"));
-        }
-    catch(Exception e){
+    /*
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new MessageResponse("invalid poll format"));
         }
-
+*/
     }
 
 

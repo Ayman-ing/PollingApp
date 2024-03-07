@@ -7,6 +7,7 @@ import com.example.polls.payload.JwtResponse;
 import com.example.polls.payload.MessageResponse;
 import com.example.polls.repository.RoleRepository;
 import com.example.polls.repository.UserRepository;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public class AuthenticationService {
         this.roleRepository = roleRepository;
     }
 
-    public ResponseEntity<?> loginUser(String username, String password) throws BadCredentialsException {
+    public ResponseEntity<?> loginUser(String username, String password)   {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username,
@@ -70,7 +71,7 @@ public class AuthenticationService {
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Error: Email is already taken!"));
         }
 
         // Create new user's account

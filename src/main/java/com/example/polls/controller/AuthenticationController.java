@@ -4,6 +4,7 @@ import com.example.polls.payload.LoginRequest;
 import com.example.polls.payload.MessageResponse;
 import com.example.polls.payload.RegisterRequest;
 import com.example.polls.service.AuthenticationService;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class AuthenticationController {
 
 
     @PostMapping(path="/api/auth/login")
-    public ResponseEntity<?> AuthenticationAndGetToken(@Valid @RequestBody LoginRequest loginRequest) throws HttpMessageNotReadableException,BadCredentialsException {
+    public ResponseEntity<?> AuthenticationAndGetToken(@Valid @RequestBody LoginRequest loginRequest) throws ConstraintViolationException,HttpMessageNotReadableException,BadCredentialsException {
 
         return authenticationService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
 
