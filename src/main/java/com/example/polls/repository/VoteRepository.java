@@ -5,9 +5,11 @@ import com.example.polls.domain.entities.VoteEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,4 +39,7 @@ public interface VoteRepository extends JpaRepository<VoteEntity,Long> {
     Page<Long> findVotedPollIdsByUserId(@Param("userId") Long userId, Pageable pageable);
     @Query("SELECT v FROM VoteEntity v WHERE v.choice.id = :choiceId")
     List<VoteEntity> findVoteEntitiesByChoiceId(@Param("choiceId") Long choiceId);
+    @Transactional
+    @Modifying
+    void deleteByUserIdAndPollId( Long id,Long pollId);
 }

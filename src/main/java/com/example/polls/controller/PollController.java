@@ -89,5 +89,13 @@ public class PollController {
                                  @Valid @RequestBody VoteRequest voteRequest) {
         return pollService.castVoteAndGetUpdatedPoll(pollId, voteRequest, currentUser);
     }
+    @DeleteMapping("/{pollId}/votes")
+    @PreAuthorize("hasRole('USER')")
+    public PollResponse castVote(@CurrentUser CustomUserDetails currentUser,
+                                 @PathVariable Long pollId)
+                                  {
+        return pollService.deleteVoteAndGetUpdatedPoll(pollId, currentUser);
+    }
+
 
 }

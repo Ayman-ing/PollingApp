@@ -273,6 +273,27 @@ public class PollService {
 
         return ModelMapper.mapPollToPollResponse(poll, choiceVotesMap, creator, vote.getChoice().getId());
     }
+    public PollResponse deleteVoteAndGetUpdatedPoll(Long pollId,CustomUserDetails currentUser) {
+        PollEntity poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Poll", "id", pollId));
+
+        if (poll.getExpirationDateTime().isBefore(Instant.now())) {
+            throw new BadRequestException("Sorry! This Poll has already expired");
+        }
+        voteRepository.deleteByUserIdAndPollId(currentUser.getId(),pollId);
+
+        // Retrieve Vote Counts of every choice belonging to the current poll
+        List<ChoiceVoteCount> votes = voteRepository.countByPollIdGroupByChoiceId(pollId);
+
+        Map<Long, Long> choiceVotesMap = votes.stream()
+                .collect(Collectors.toMap(ChoiceVoteCount::getChoiceId, ChoiceVoteCount::getVoteCount));
+
+        // Retrieve poll creator details
+        UserEntity creator = userRepository.findById(poll.getCreatedBy())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", poll.getCreatedBy()));
+
+        return ModelMapper.mapPollToPollResponse(poll, choiceVotesMap, creator,null);
+    }
 
     public void deletePollByID(Long pollId, CustomUserDetails currentUser) {
         PollEntity poll = pollRepository.findById(pollId)
@@ -304,4 +325,6 @@ public class PollService {
         choiceRepository.deleteByChoiceId(choiceId);
         return ResponseEntity.status(200).body(new MessageResponse(true,"choice deleted successfully"));
     }
+
+
 }
