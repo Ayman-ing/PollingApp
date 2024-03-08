@@ -19,4 +19,5 @@ public interface PollRepository extends JpaRepository<PollEntity, Long> {
     List<PollEntity> findByIdIn(List<Long> pollIds);
     List<PollEntity> findByIdIn(List<Long> pollIds, Sort sort);
 
+
 }

@@ -42,7 +42,9 @@ public class ExceptionHandlerAdvice {
 
         if (e instanceof ResourceNotFoundException) {
 
-            return ((ResourceNotFoundException) e).getResponseEntity();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new MessageResponse( e.getMessage())
+            );
         }
 
 

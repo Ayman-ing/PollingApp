@@ -9,10 +9,8 @@ import com.example.polls.domain.entities.UserEntity;
 import com.example.polls.domain.entities.VoteEntity;
 import com.example.polls.exception.BadRequestException;
 import com.example.polls.exception.ResourceNotFoundException;
-import com.example.polls.payload.PagedResponse;
-import com.example.polls.payload.PollRequest;
-import com.example.polls.payload.PollResponse;
-import com.example.polls.payload.VoteRequest;
+import com.example.polls.payload.*;
+import com.example.polls.repository.ChoiceRepository;
 import com.example.polls.repository.PollRepository;
 import com.example.polls.repository.UserRepository;
 import com.example.polls.repository.VoteRepository;
@@ -25,7 +23,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -43,21 +44,28 @@ public class PollService {
     final private VoteRepository voteRepository;
 
     final private UserRepository userRepository;
+
+    final private ChoiceRepository choiceRepository;
+
     public PollService(PollRepository pollRepository,
                        VoteRepository voteRepository,
-                       UserRepository userRepository){
-        this.pollRepository=pollRepository;
-        this.voteRepository=voteRepository;
-        this.userRepository=userRepository;
+                       UserRepository userRepository,
+                       ChoiceRepository choiceRepository) {
+        this.pollRepository = pollRepository;
+        this.voteRepository = voteRepository;
+        this.userRepository = userRepository;
+        this.choiceRepository = choiceRepository;
 
     }
+
     private static final Logger logger = LoggerFactory.getLogger(PollService.class);
+
     public PagedResponse<PollResponse> getAllPolls(CustomUserDetails currentUser,
-                                                   int page, int size){
+                                                   int page, int size) {
         // Retrieve Polls
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         Page<PollEntity> polls = pollRepository.findAll(pageable);
-        if(polls.getNumberOfElements() == 0) {
+        if (polls.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), polls.getNumber(),
                     polls.getSize(), polls.getTotalElements(), polls.getTotalPages(), polls.isLast());
         }
@@ -74,6 +82,7 @@ public class PollService {
         return new PagedResponse<>(pollResponses, polls.getNumber(),
                 polls.getSize(), polls.getTotalElements(), polls.getTotalPages(), polls.isLast());
     }
+
     public PagedResponse<PollResponse> getPollsCreatedBy(String username, CustomUserDetails currentUser, int page, int size) {
         validatePageNumberAndSize(page, size);
 
@@ -102,6 +111,7 @@ public class PollService {
         return new PagedResponse<>(pollResponses, polls.getNumber(),
                 polls.getSize(), polls.getTotalElements(), polls.getTotalPages(), polls.isLast());
     }
+
     public PagedResponse<PollResponse> getPollsVotedBy(String username, CustomUserDetails currentUser, int page, int size) {
         validatePageNumberAndSize(page, size);
 
@@ -136,12 +146,13 @@ public class PollService {
 
         return new PagedResponse<>(pollResponses, userVotedPollIds.getNumber(), userVotedPollIds.getSize(), userVotedPollIds.getTotalElements(), userVotedPollIds.getTotalPages(), userVotedPollIds.isLast());
     }
+
     private void validatePageNumberAndSize(int page, int size) {
-        if(page < 0) {
+        if (page < 0) {
             throw new BadRequestException("Page number cannot be less than zero.");
         }
 
-        if(size > AppConstants.MAX_PAGE_SIZE) {
+        if (size > AppConstants.MAX_PAGE_SIZE) {
             throw new BadRequestException("Page size must not be greater than " + AppConstants.MAX_PAGE_SIZE);
         }
     }
@@ -162,12 +173,12 @@ public class PollService {
 
         // Retrieve vote done by logged in user
         VoteEntity userVote = null;
-        if(currentUser != null) {
+        if (currentUser != null) {
             userVote = voteRepository.findByUserIdAndPollId(currentUser.getId(), pollId);
         }
 
         return ModelMapper.mapPollToPollResponse(poll, choiceVotesMap,
-                creator, userVote != null ? userVote.getChoice().getId(): null);
+                creator, userVote != null ? userVote.getChoice().getId() : null);
     }
 
 
@@ -183,7 +194,7 @@ public class PollService {
     private Map<Long, Long> getPollUserVoteMap(CustomUserDetails currentUser, List<Long> pollIds) {
         // Retrieve Votes done by the logged-in user to the given pollIds
         Map<Long, Long> pollUserVoteMap = null;
-        if(currentUser != null) {
+        if (currentUser != null) {
             List<VoteEntity> userVotes = voteRepository.findByUserIdAndPollIdIn(currentUser.getId(), pollIds);
 
             pollUserVoteMap = userVotes.stream()
@@ -205,6 +216,7 @@ public class PollService {
                 .collect(Collectors.toMap(UserEntity::getId, Function.identity()));
 
     }
+
     public PollEntity createPoll(PollRequest pollRequest) {
         PollEntity poll = new PollEntity();
         poll.setQuestion(pollRequest.getQuestion());
@@ -219,11 +231,12 @@ public class PollService {
 
         return pollRepository.save(poll);
     }
+
     public PollResponse castVoteAndGetUpdatedPoll(Long pollId, VoteRequest voteRequest, CustomUserDetails currentUser) {
         PollEntity poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll", "id", pollId));
 
-        if(poll.getExpirationDateTime().isBefore(Instant.now())) {
+        if (poll.getExpirationDateTime().isBefore(Instant.now())) {
             throw new BadRequestException("Sorry! This Poll has already expired");
         }
 
@@ -261,4 +274,34 @@ public class PollService {
         return ModelMapper.mapPollToPollResponse(poll, choiceVotesMap, creator, vote.getChoice().getId());
     }
 
+    public void deletePollByID(Long pollId, CustomUserDetails currentUser) {
+        PollEntity poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Poll", "id", pollId));
+        UserEntity creator = userRepository.findById(poll.getCreatedBy())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", poll.getCreatedBy()));
+        if (!creator.getId().equals(currentUser.getId())){
+            throw new BadRequestException("you didn't create this poll !");
+        }
+        List<VoteEntity> votes = voteRepository.findVoteEntitiesByPollId(pollId);
+        voteRepository.deleteAll(votes);
+        pollRepository.deleteById(pollId);
+    }
+
+
+    public ResponseEntity<?> deleteChoiceByID(Long choiceId, CustomUserDetails currentUser) {
+        ChoiceEntity choice =  choiceRepository.getChoiceById(choiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("choice ","id", choiceId));
+       Long  pollId= choiceRepository.getPollIdByChoiceId(choiceId);
+        PollEntity poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Poll", "id", pollId));
+        UserEntity creator = userRepository.findById(poll.getCreatedBy())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", poll.getCreatedBy()));
+        if (!creator.getId().equals(currentUser.getId())){
+            throw new BadRequestException("you didn't create this poll !");
+        }
+        List<VoteEntity> votes = voteRepository.findVoteEntitiesByChoiceId(choice.getId());
+        voteRepository.deleteAll(votes);
+        choiceRepository.deleteByChoiceId(choiceId);
+        return ResponseEntity.status(200).body(new MessageResponse(true,"choice deleted successfully"));
+    }
 }

@@ -24,6 +24,9 @@ public interface VoteRepository extends JpaRepository<VoteEntity,Long> {
     @Query("SELECT v FROM VoteEntity v where v.user.id = :userId and v.poll.id in :pollIds")
     List<VoteEntity> findByUserIdAndPollIdIn(@Param("userId") Long userId, @Param("pollIds") List<Long> pollIds);
 
+
+    List<VoteEntity> findVoteEntitiesByPollId(Long pollId);
+
     @Query("SELECT v FROM VoteEntity v where v.user.id = :userId and v.poll.id = :pollId")
     VoteEntity findByUserIdAndPollId(@Param("userId") Long userId, @Param("pollId") Long pollId);
 
@@ -32,4 +35,6 @@ public interface VoteRepository extends JpaRepository<VoteEntity,Long> {
 
     @Query("SELECT v.poll.id FROM VoteEntity v WHERE v.user.id = :userId")
     Page<Long> findVotedPollIdsByUserId(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT v FROM VoteEntity v WHERE v.choice.id = :choiceId")
+    List<VoteEntity> findVoteEntitiesByChoiceId(@Param("choiceId") Long choiceId);
 }

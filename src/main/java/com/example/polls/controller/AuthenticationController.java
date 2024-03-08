@@ -38,6 +38,7 @@ public class AuthenticationController {
 
     }
 
+
     @PostMapping(path="/api/auth/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) throws ConstraintViolationException, HttpMessageNotReadableException {
             return authenticationService.registerUser(signUpRequest.getUsername(),
